@@ -240,10 +240,18 @@ public class DefaultCodegen {
                 List<Map<String, String>> enumVars = new ArrayList<Map<String, String>>();
                 String commonPrefix = findCommonPrefixOfVars(values);
                 int truncateIdx = commonPrefix.length();
+
+                int idx = 0;
+                List<String> enumNames = null;
+                if (cm.vendorExtensions.containsKey("x-enumNames")) {
+                    enumNames = (List<String>)cm.vendorExtensions.get("x-enumNames");
+                }
                 for (Object value : values) {
                     Map<String, String> enumVar = new HashMap<String, String>();
                     String enumName;
-                    if (truncateIdx == 0) {
+                    if (enumNames != null && idx < enumNames.size() ) {
+                        enumName = enumNames.get(idx);
+                    } else if (truncateIdx == 0) {
                         enumName = value.toString();
                     } else {
                         enumName = value.toString().substring(truncateIdx);
@@ -254,6 +262,7 @@ public class DefaultCodegen {
                     enumVar.put("name", toEnumVarName(enumName, cm.dataType));
                     enumVar.put("value", toEnumValue(value.toString(), cm.dataType));
                     enumVars.add(enumVar);
+                    idx++;
                 }
                 cm.allowableValues.put("enumVars", enumVars);
             }
@@ -3715,14 +3724,22 @@ public class DefaultCodegen {
             return;
         }
 
+        int idx = 0;
         // put "enumVars" map into `allowableValues", including `name` and `value`
         List<Map<String, String>> enumVars = new ArrayList<Map<String, String>>();
         String commonPrefix = findCommonPrefixOfVars(values);
         int truncateIdx = commonPrefix.length();
+
+        List<String> enumNames = null;
+        if (var.vendorExtensions.containsKey("x-enumNames")) {
+            enumNames = (List<String>)var.vendorExtensions.get("x-enumNames");
+        }
         for (Object value : values) {
             Map<String, String> enumVar = new HashMap<String, String>();
             String enumName;
-            if (truncateIdx == 0) {
+            if (enumNames != null && idx < enumNames.size() ) {
+                enumName = enumNames.get(idx);
+            } else if (truncateIdx == 0) {
                 enumName = value.toString();
             } else {
                 enumName = value.toString().substring(truncateIdx);
@@ -3733,6 +3750,7 @@ public class DefaultCodegen {
             enumVar.put("name", toEnumVarName(enumName, var.datatype));
             enumVar.put("value", toEnumValue(value.toString(), var.datatype));
             enumVars.add(enumVar);
+            idx++;
         }
         allowableValues.put("enumVars", enumVars);
 
